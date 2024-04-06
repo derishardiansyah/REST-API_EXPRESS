@@ -1,6 +1,5 @@
 import validator from "email-validator";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 
 import conn from "../Config/config.js";
 import responseHelper from "../Helper/responHelper.js";
@@ -29,10 +28,11 @@ const userController = {
         );
       }
 
+      // Check if email already exists
       conn.query(
         "SELECT * FROM user WHERE email = ?",
         [email],
-        (error, results) => {
+        async (error, results) => {
           if (error) {
             return responseHelper(
               res,
@@ -44,6 +44,8 @@ const userController = {
           if (results.length > 0) {
             return responseHelper(res, 400, "", "Email sudah terdaftar");
           }
+
+          // Insert user into database with plain text password
           conn.query(
             "INSERT INTO user (email, first_name, last_name, password) VALUES (?, ?, ?, ?)",
             [email, first_name, last_name, password],
@@ -95,10 +97,11 @@ const userController = {
         );
       }
 
+      // Retrieve user from database
       conn.query(
         "SELECT * FROM user WHERE email = ?",
         [email],
-        (error, results) => {
+        async (error, results) => {
           if (error) {
             return responseHelper(
               res,
@@ -108,12 +111,26 @@ const userController = {
             );
           }
           if (results.length === 0) {
-            return responseHelper(res, 400, "", "Email belum terdaftar");
+            return responseHelper(res, 401, "", "Email atau Password salah");
           }
-          const isMatch = bcrypt.compareSync(password, results[0].password);
-          if (!isMatch) {
-            return responseHelper(res, 400, "", "Password salah");
+
+          if (results[0].password !== password) {
+            return responseHelper(res, 401, "", "Email atau Password salah");
           }
+
+          const payload = jwt.sign(
+            {
+              email: email,
+            },
+            process.env.secretLogin,
+            {
+              expiresIn: "12h",
+            }
+          );
+          const data = {
+            token: payload,
+          };
+          return responseHelper(res, 200, data, "Login berhasil");
         }
       );
     } catch (err) {
