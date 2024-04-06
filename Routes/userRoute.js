@@ -16,5 +16,6 @@ userRouter.put(
   userController.profileImage
 );
 userRouter.get("/banner", userController.getBanner);
+userRouter.get("/service", verifyToken, userController.getService);
 
 export default userRouter;

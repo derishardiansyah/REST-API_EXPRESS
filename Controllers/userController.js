@@ -228,7 +228,6 @@ const userController = {
       if (!allowedExtensions.includes(fileExtension)) {
         return responseHelper(res, 401, null, "Format Image tidak sesuai");
       }
-      console.log(req.file);
 
       const profile_image = req.file.filename;
 
@@ -299,6 +298,34 @@ const userController = {
         const allBanner = results;
         return responseHelper(res, 200, allBanner, "Sukses");
       });
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
+  getService: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const decode = jwt.verify(token, process.env.secretLogin);
+      const email = decode.email;
+
+      conn.query(
+        "SELECT * FROM service ORDER BY service_name",
+        (error, results) => {
+          if (error) {
+            return responseHelper(
+              res,
+              500,
+              null,
+              "Terjadi kesalahan pada server"
+            );
+          }
+          if (results.length === 0) {
+            return responseHelper(res, 404, null, "Service tidak ditemukan");
+          }
+          const allService = results;
+          return responseHelper(res, 200, allService, "Sukses");
+        }
+      );
     } catch (err) {
       return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
     }

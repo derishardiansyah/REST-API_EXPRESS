@@ -38,7 +38,7 @@ const createTable = () => {
     service_code VARCHAR(10) PRIMARY KEY,
     service_name VARCHAR(100),
     service_icon VARCHAR(255),
-    service_tarif DECIMAL(10, 2)
+    service_tarif INT
   )`,
     (err, result) => {
       if (err) {
