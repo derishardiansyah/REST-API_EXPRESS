@@ -282,6 +282,27 @@ const userController = {
       return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
     }
   },
+  getBanner: async (req, res) => {
+    try {
+      conn.query("SELECT * FROM banner", (error, results) => {
+        if (error) {
+          return responseHelper(
+            res,
+            500,
+            null,
+            "Terjadi kesalahan pada server"
+          );
+        }
+        if (results.length === 0) {
+          return responseHelper(res, 404, null, "Banner tidak ditemukan");
+        }
+        const allBanner = results;
+        return responseHelper(res, 200, allBanner, "Sukses");
+      });
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
 };
 
 export default userController;

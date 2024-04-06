@@ -15,5 +15,6 @@ userRouter.put(
   upload.single("profile_image"),
   userController.profileImage
 );
+userRouter.get("/banner", userController.getBanner);
 
 export default userRouter;
