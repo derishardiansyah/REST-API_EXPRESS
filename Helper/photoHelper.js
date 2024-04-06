@@ -13,17 +13,8 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = function (req, file, cb) {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true);
-  } else {
-    cb(new Error("Hanya file JPEG dan PNG yang diperbolehkan"), false);
-  }
-};
-
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
 });
 
 export default upload;

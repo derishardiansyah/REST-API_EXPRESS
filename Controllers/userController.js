@@ -1,6 +1,6 @@
 import validator from "email-validator";
 import jwt from "jsonwebtoken";
-
+import path from "path";
 import conn from "../Config/config.js";
 import responseHelper from "../Helper/responHelper.js";
 
@@ -79,7 +79,7 @@ const userController = {
       if (!validator.validate(email)) {
         return responseHelper(
           res,
-          102,
+          400,
           email,
           "Parameter email tidak sesuai format",
           "error"
@@ -218,10 +218,17 @@ const userController = {
       const decode = jwt.verify(token, process.env.secretLogin);
       const email = decode.email;
 
-      // Memeriksa apakah ada file yang diunggah
       if (!req.file) {
         return responseHelper(res, 400, null, "Tidak ada file yang diunggah");
       }
+
+      const allowedExtensions = [".png", ".jpg", ".jpeg"];
+      const fileExtension = path.extname(req.file.filename).toLowerCase();
+
+      if (!allowedExtensions.includes(fileExtension)) {
+        return responseHelper(res, 401, null, "Format Image tidak sesuai");
+      }
+      console.log(req.file);
 
       const profile_image = req.file.filename;
 
