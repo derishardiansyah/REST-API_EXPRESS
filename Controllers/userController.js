@@ -79,7 +79,7 @@ const userController = {
       if (!validator.validate(email)) {
         return responseHelper(
           res,
-          400,
+          102,
           email,
           "Parameter email tidak sesuai format",
           "error"
@@ -164,6 +164,48 @@ const userController = {
 
           const userProfile = results[0];
           return responseHelper(res, 200, userProfile, "Sukses");
+        }
+      );
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
+  updateProfile: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const decode = jwt.verify(token, process.env.secretLogin);
+      const email = decode.email;
+
+      const { first_name, last_name } = req.body;
+
+      conn.query(
+        "UPDATE user SET first_name = ?, last_name = ? WHERE email = ?",
+        [first_name, last_name, email],
+        (error, results) => {
+          if (error) {
+            return responseHelper(
+              res,
+              500,
+              null,
+              "Terjadi kesalahan pada server"
+            );
+          }
+
+          if (results.affectedRows === 0) {
+            return responseHelper(
+              res,
+              404,
+              null,
+              "Profil pengguna tidak ditemukan"
+            );
+          }
+          const userProfile = { email, first_name, last_name };
+          return responseHelper(
+            res,
+            200,
+            userProfile,
+            "Update profile berhasil"
+          );
         }
       );
     } catch (err) {

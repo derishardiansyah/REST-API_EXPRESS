@@ -7,7 +7,7 @@ const verifyToken = (req, res, next) => {
     return res.status(403).json({
       status: "error",
       statusCode: 403,
-      message: "No token provided",
+      message: "Token tidak valid atau kadaluwarsa",
     });
   }
 
@@ -17,7 +17,7 @@ const verifyToken = (req, res, next) => {
       return res.status(401).json({
         status: "error",
         statusCode: 401,
-        message: "Failed to authenticate token",
+        message: "Token tidak valid atau kadaluwarsa",
       });
     }
     req.user = decoded;

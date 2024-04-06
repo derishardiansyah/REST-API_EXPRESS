@@ -1,7 +1,6 @@
 import conn from "../Config/config.js";
 
 const createTable = () => {
-  // Membuat tabel user
   conn.query(
     `CREATE TABLE IF NOT EXISTS user (
     email VARCHAR(255) PRIMARY KEY,
@@ -19,7 +18,6 @@ const createTable = () => {
     }
   );
 
-  // Membuat tabel banner
   conn.query(
     `CREATE TABLE IF NOT EXISTS banner (
     banner_name VARCHAR(50) PRIMARY KEY,
@@ -35,7 +33,6 @@ const createTable = () => {
     }
   );
 
-  // Membuat tabel service
   conn.query(
     `CREATE TABLE IF NOT EXISTS service (
     service_code VARCHAR(10) PRIMARY KEY,
@@ -52,7 +49,6 @@ const createTable = () => {
     }
   );
 
-  // Membuat tabel amount
   conn.query(
     `CREATE TABLE IF NOT EXISTS amount (
     transaction_type ENUM('top_up', 'payment') NOT NULL,
