@@ -212,6 +212,69 @@ const userController = {
       return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
     }
   },
+  profileImage: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const decode = jwt.verify(token, process.env.secretLogin);
+      const email = decode.email;
+
+      // Memeriksa apakah ada file yang diunggah
+      if (!req.file) {
+        return responseHelper(res, 400, null, "Tidak ada file yang diunggah");
+      }
+
+      const profile_image = req.file.filename;
+
+      conn.query(
+        "UPDATE user SET profile_image = ? WHERE email = ?",
+        [profile_image, email],
+        (error, results) => {
+          if (error) {
+            return responseHelper(
+              res,
+              500,
+              null,
+              "Terjadi kesalahan pada server"
+            );
+          }
+
+          if (results.affectedRows === 0) {
+            return responseHelper(
+              res,
+              404,
+              null,
+              "Profil pengguna tidak ditemukan"
+            );
+          }
+
+          conn.query(
+            "SELECT email, first_name, last_name, profile_image FROM user WHERE email = ?",
+            [email],
+            (error, results) => {
+              if (error) {
+                return responseHelper(
+                  res,
+                  500,
+                  null,
+                  "Terjadi kesalahan pada server"
+                );
+              }
+
+              const userProfile = results[0];
+              return responseHelper(
+                res,
+                200,
+                userProfile,
+                "Update profile berhasil"
+              );
+            }
+          );
+        }
+      );
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
 };
 
 export default userController;
