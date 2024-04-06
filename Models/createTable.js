@@ -6,7 +6,7 @@ const createTable = () => {
     email VARCHAR(255) PRIMARY KEY,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
-    password VARCHAR(255) NOT NULL CHECK (CHAR_LENGTH(password) >= 8),
+    password VARCHAR(255) NOT NULL,
     profile_image VARCHAR(255)
   )`,
     (err, result) => {
@@ -38,7 +38,7 @@ const createTable = () => {
     service_code VARCHAR(10) PRIMARY KEY,
     service_name VARCHAR(100),
     service_icon VARCHAR(255),
-    service_tarif INT
+    service_tarif INT        
   )`,
     (err, result) => {
       if (err) {
@@ -50,19 +50,20 @@ const createTable = () => {
   );
 
   conn.query(
-    `CREATE TABLE IF NOT EXISTS amount (
+    `CREATE TABLE IF NOT EXISTS transaction (
     transaction_type ENUM('top_up', 'payment') NOT NULL,
-    top_up_amount DECIMAL(10, 2),
-    total_amount DECIMAL(10, 2),
+    top_up_amount INT,
+    total_amount INT,
     created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
-    invoice_number VARCHAR(20) PRIMARY KEY
+    invoice_number VARCHAR(20) PRIMARY KEY,
+    balance INT
   )`,
     (err, result) => {
       if (err) {
         console.error("Error creating amount table:", err);
         return;
       }
-      console.log("Amount table created successfully");
+      console.log("transaction table created successfully");
       // conn.end();
     }
   );
