@@ -376,6 +376,14 @@ const userController = {
       const email = decode.email;
 
       const top_up_amount = parseInt(req.body.top_up_amount);
+      if (top_up_amount <= 0 || isNaN(top_up_amount)) {
+        return responseHelper(
+          res,
+          400,
+          null,
+          "Parameter amount hanya boleh angka dan tidak boleh lebih kecil dari 0"
+        );
+      }
 
       conn.query(
         "SELECT user_id FROM user WHERE email = ?",
