@@ -17,5 +17,7 @@ userRouter.put(
 );
 userRouter.get("/banner", userController.getBanner);
 userRouter.get("/service", verifyToken, userController.getService);
+userRouter.get("/balance", verifyToken, userController.getBalance);
+userRouter.post("/topup", verifyToken, userController.topUp);
 
 export default userRouter;

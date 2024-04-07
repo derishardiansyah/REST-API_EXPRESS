@@ -4,6 +4,14 @@ import path from "path";
 import conn from "../Config/config.js";
 import responseHelper from "../Helper/responHelper.js";
 
+let counter = 1;
+
+function generateInvoiceNumber() {
+  const invoiceNumber = `INV-${counter.toString().padStart(4, "0")}`;
+  counter++;
+  return invoiceNumber;
+}
+
 const userController = {
   addUser: async (req, res) => {
     try {
@@ -324,6 +332,128 @@ const userController = {
           }
           const allService = results;
           return responseHelper(res, 200, allService, "Sukses");
+        }
+      );
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
+  getBalance: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const decode = jwt.verify(token, process.env.secretLogin);
+      const email = decode.email;
+
+      conn.query("SELECT balance FROM transaction", (error, results) => {
+        if (error) {
+          return responseHelper(
+            res,
+            500,
+            null,
+            "Terjadi kesalahan pada server"
+          );
+        }
+        if (results.length === 0) {
+          return responseHelper(res, 404, null, "Balance tidak ditemukan");
+        }
+        const balance = results[0];
+        return responseHelper(res, 200, balance, "Sukses");
+      });
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
+  topUp: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const decode = jwt.verify(token, process.env.secretLogin);
+      const email = decode.email;
+
+      const top_up_amount = parseInt(req.body.top_up_amount);
+
+      conn.query(
+        "SELECT user_id FROM user WHERE email = ?",
+        [email],
+        (error, userResults) => {
+          if (error) {
+            return responseHelper(
+              res,
+              500,
+              null,
+              "Terjadi kesalahan pada server"
+            );
+          }
+          if (userResults.length === 0) {
+            return responseHelper(res, 404, null, "Pengguna tidak ditemukan");
+          }
+
+          const user_id = userResults[0].user_id;
+
+          conn.query(
+            "SELECT COALESCE(SUM(top_up_amount), 0) AS current_balance FROM transaction WHERE user_id = ?",
+            [user_id],
+            (error, balanceResults) => {
+              if (error) {
+                return responseHelper(
+                  res,
+                  500,
+                  null,
+                  "Terjadi kesalahan pada server"
+                );
+              }
+
+              const currentBalance = balanceResults[0].current_balance;
+              const balance = currentBalance + top_up_amount;
+              const total_amount = balance;
+              const invoice_number = generateInvoiceNumber();
+              const created_on = new Date();
+
+              conn.query(
+                "INSERT INTO transaction (user_id, transaction_type, top_up_amount, total_amount, created_on, invoice_number, description) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [
+                  user_id,
+                  "top_up",
+                  top_up_amount,
+                  total_amount,
+                  created_on,
+                  invoice_number,
+                  "Top up saldo",
+                ],
+                (error, insertResults) => {
+                  if (error) {
+                    return responseHelper(
+                      res,
+                      500,
+                      null,
+                      "Gagal melakukan top-up"
+                    );
+                  }
+
+                  conn.query(
+                    "UPDATE transaction SET balance = ? WHERE user_id = ?",
+                    [balance, user_id],
+                    (error, updateResults) => {
+                      if (error) {
+                        return responseHelper(
+                          res,
+                          500,
+                          null,
+                          "Gagal melakukan top-up"
+                        );
+                      }
+
+                      return responseHelper(
+                        res,
+                        200,
+                        { balance: balance },
+                        "Top-up balance berhasil"
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          );
         }
       );
     } catch (err) {
