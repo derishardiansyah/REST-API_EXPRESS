@@ -3,7 +3,7 @@ import createTable from "./Models/createTable.js";
 import userRouter from "./Routes/userRoute.js";
 import docRouter from "./Routes/docRoute.js";
 
-const port = process.env.DB_PORT || 6100;
+const port = process.env.DB_PORT || 3000;
 
 const app = express();
 
