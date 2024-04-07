@@ -11,6 +11,7 @@ const conn = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   //   socketPath: process.env.DB_SOCKET,
+  port: process.env.DB_PORT,
 });
 
 export default conn;
