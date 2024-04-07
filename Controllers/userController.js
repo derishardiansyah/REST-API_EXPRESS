@@ -419,18 +419,16 @@ const userController = {
               const currentBalance = balanceResults[0].current_balance;
               const balance = currentBalance + top_up_amount;
               const total_amount = balance;
-              const invoice_number = generateInvoiceNumber();
               const created_on = new Date();
 
               conn.query(
-                "INSERT INTO transaction (user_id, transaction_type, top_up_amount, total_amount, created_on, invoice_number, description) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO transaction (user_id, transaction_type, top_up_amount, total_amount, created_on, description) VALUES (?, ?, ?, ?, ?, ?)",
                 [
                   user_id,
                   "top_up",
                   top_up_amount,
                   total_amount,
                   created_on,
-                  invoice_number,
                   "Top up saldo",
                 ],
                 (error, insertResults) => {
