@@ -1,6 +1,7 @@
 import express from "express";
 import createTable from "./Models/createTable.js";
 import userRouter from "./Routes/userRoute.js";
+import docRouter from "./Routes/docRoute.js";
 
 const port = process.env.DB_PORT || 6100;
 
@@ -10,7 +11,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 createTable();
-app.use("/", userRouter);
+app.use("/", docRouter);
+app.use("/api", userRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

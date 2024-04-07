@@ -4,12 +4,13 @@ import path from "path";
 import conn from "../Config/config.js";
 import responseHelper from "../Helper/responHelper.js";
 
-let counter = 1;
-
 function generateInvoiceNumber() {
-  const invoiceNumber = `INV-${counter.toString().padStart(4, "0")}`;
-  counter++;
-  return invoiceNumber;
+  const currentDate = new Date();
+  const day = currentDate.getDate().toString().padStart(2, "0");
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0"); // Bulan dimulai dari 0
+  const year = currentDate.getFullYear().toString();
+  const invoiceDate = `${day}${month}${year}`;
+  return `INV${invoiceDate}-`;
 }
 
 const userController = {
