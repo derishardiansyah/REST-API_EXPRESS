@@ -3,7 +3,7 @@ import createTable from "./Models/createTable.js";
 import userRouter from "./Routes/userRoute.js";
 import docRouter from "./Routes/docRoute.js";
 
-const port = process.env.DB_PORT || 3000;
+const port = process.env.DB_PORT || 4000;
 
 const app = express();
 
@@ -14,7 +14,7 @@ createTable();
 app.use("/", docRouter);
 app.use("/api", userRouter);
 
-app.listen(port, "0.0.0.0", () => {
+app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
