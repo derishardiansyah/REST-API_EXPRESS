@@ -79,7 +79,6 @@ const userController = {
       responseHelper(res, 500, err, "Terjadi kesalahan pada server");
     }
   },
-
   loginUser: async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -344,21 +343,28 @@ const userController = {
       const decode = jwt.verify(token, process.env.secretLogin);
       const email = decode.email;
 
-      conn.query("SELECT balance FROM transaction", (error, results) => {
-        if (error) {
-          return responseHelper(
-            res,
-            500,
-            null,
-            "Terjadi kesalahan pada server"
-          );
+      conn.query(
+        "SELECT balance FROM transaction INNER JOIN user ON transaction.user_id = user.user_id WHERE user.email = ?",
+        [email],
+        (error, results) => {
+          if (error) {
+            return responseHelper(
+              res,
+              500,
+              null,
+              "Terjadi kesalahan pada server"
+            );
+          }
+          if (results.length === 0) {
+            return responseHelper(res, 404, null, "Balance tidak ditemukan");
+          }
+          const newBalance = results[0].balance;
+          const data = {
+            balance: newBalance,
+          };
+          return responseHelper(res, 200, data, "Balance berhasil");
         }
-        if (results.length === 0) {
-          return responseHelper(res, 404, null, "Balance tidak ditemukan");
-        }
-        const balance = results[0];
-        return responseHelper(res, 200, balance, "Sukses");
-      });
+      );
     } catch (err) {
       return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
     }
