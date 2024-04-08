@@ -421,10 +421,11 @@ const userController = {
               const currentBalance = balanceResults[0].current_balance;
               const balance = currentBalance + top_up_amount;
               const total_amount = balance;
+              const invoice_number = generateInvoiceNumber();
               const created_on = new Date();
 
               conn.query(
-                "INSERT INTO transaction (user_id, transaction_type, top_up_amount, total_amount, created_on, description, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO transaction (user_id, transaction_type, top_up_amount, total_amount, created_on, description, balance, invoice_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                   user_id,
                   "top_up",
@@ -433,6 +434,7 @@ const userController = {
                   created_on,
                   "Top up saldo",
                   balance,
+                  invoice_number,
                 ],
                 (error, insertResults) => {
                   if (error) {
@@ -460,7 +462,6 @@ const userController = {
       return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
     }
   },
-
   transaction: async (req, res) => {
     try {
       const token = req.headers.authorization.split(" ")[1];
@@ -579,6 +580,44 @@ const userController = {
               );
             }
           );
+        }
+      );
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
+  getTransactionHistory: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const decode = jwt.verify(token, process.env.secretLogin);
+      const email = decode.email;
+
+      conn.query(
+        "SELECT transaction.*, user.email, service.service_name " +
+          "FROM transaction " +
+          "LEFT JOIN user ON transaction.user_id = user.user_id " +
+          "LEFT JOIN service ON transaction.service_id = service.service_id " +
+          "ORDER BY transaction.created_on DESC",
+        (error, results) => {
+          if (error) {
+            return responseHelper(
+              res,
+              500,
+              null,
+              "Terjadi kesalahan pada server"
+            );
+          }
+          const records = results.map((result) => ({
+            invoice_number: result.invoice_number,
+            transaction_type: result.transaction_type,
+            description: result.description,
+            total_amount: result.total_amount,
+            created_on: result.created_on,
+          }));
+          const data = {
+            records: records,
+          };
+          return responseHelper(res, 200, data, "Get History Berhasil");
         }
       );
     } catch (err) {
