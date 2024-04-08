@@ -11,10 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // createTable();
-// app.use("/", docRouter);
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use("/", docRouter);
 app.use("/api", userRouter);
 
 app.listen(port, () => {
