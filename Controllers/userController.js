@@ -5,10 +5,11 @@ import conn from "../Config/config.js";
 import responseHelper from "../Helper/responHelper.js";
 
 let number = 1;
+
 function generateInvoiceNumber() {
   const paddedCounter = number.toString().padStart(4, "0");
   const invoiceNumber = `INV-${paddedCounter}`;
-
+  number++;
   return invoiceNumber;
 }
 
