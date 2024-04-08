@@ -91,7 +91,7 @@ const docController = {
           Request: {
             Authorization: "token",
           },
-          Description: "Berhasil melakukan payment",
+          Description: "Berhasil mendapatkan history top up dan payment",
         },
       ],
     });
