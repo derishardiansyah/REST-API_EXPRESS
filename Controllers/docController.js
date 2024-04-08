@@ -2,7 +2,8 @@ const docController = {
   getAllDocs: (req, res) => {
     res.json({
       Message: "Welcome to Doc API!",
-      Host: "http://localhost:4200",
+      Host: "https://rest-api-express-kappa.vercel.app/",
+      By: "Deris Hardiansyah Ismail",
       Data: [
         {
           Endpoint: "/api/registration",
