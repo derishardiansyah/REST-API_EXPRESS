@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 createTable();
-app.use("/home", docRouter);
+app.use("/", docRouter);
 app.use("/api", userRouter);
 
 app.listen(port, () => {
