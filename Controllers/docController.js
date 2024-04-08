@@ -76,6 +76,23 @@ const docController = {
           },
           Description: "Berhasil melakukan top up",
         },
+        {
+          Endpoint: "/api/transaction",
+          Method: "post",
+          Request: {
+            Authorization: "token",
+            Body: "service_code",
+          },
+          Description: "Berhasil melakukan payment",
+        },
+        {
+          Endpoint: "/api/transaction/history",
+          Method: "get",
+          Request: {
+            Authorization: "token",
+          },
+          Description: "Berhasil melakukan payment",
+        },
       ],
     });
   },
