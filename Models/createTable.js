@@ -63,7 +63,9 @@ const createTable = () => {
     created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
     invoice_number VARCHAR(20),
     balance INT,
-    description VARCHAR(255)
+    description VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (service_id) REFERENCES service(service_id)
   )`,
     (err, result) => {
       if (err) {

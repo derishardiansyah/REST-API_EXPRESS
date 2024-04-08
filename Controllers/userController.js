@@ -4,13 +4,12 @@ import path from "path";
 import conn from "../Config/config.js";
 import responseHelper from "../Helper/responHelper.js";
 
+let number = 1;
 function generateInvoiceNumber() {
-  const currentDate = new Date();
-  const day = currentDate.getDate().toString().padStart(2, "0");
-  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0"); // Bulan dimulai dari 0
-  const year = currentDate.getFullYear().toString();
-  const invoiceDate = `${day}${month}${year}`;
-  return `INV${invoiceDate}-`;
+  const paddedCounter = number.toString().padStart(4, "0");
+  const invoiceNumber = `INV-${paddedCounter}`;
+
+  return invoiceNumber;
 }
 
 const userController = {
@@ -404,8 +403,9 @@ const userController = {
 
           const user_id = userResults[0].user_id;
 
+          // Subquery untuk mendapatkan saldo terbaru pengguna
           conn.query(
-            "SELECT COALESCE(SUM(top_up_amount), 0) AS current_balance FROM transaction WHERE user_id = ?",
+            "SELECT COALESCE(SUM(top_up_amount), 0) AS current_balance FROM transaction WHERE user_id = ? ORDER BY created_on DESC LIMIT 1",
             [user_id],
             (error, balanceResults) => {
               if (error) {
@@ -423,7 +423,7 @@ const userController = {
               const created_on = new Date();
 
               conn.query(
-                "INSERT INTO transaction (user_id, transaction_type, top_up_amount, total_amount, created_on, description) VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO transaction (user_id, transaction_type, top_up_amount, total_amount, created_on, description, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [
                   user_id,
                   "top_up",
@@ -431,6 +431,7 @@ const userController = {
                   total_amount,
                   created_on,
                   "Top up saldo",
+                  balance,
                 ],
                 (error, insertResults) => {
                   if (error) {
@@ -442,24 +443,134 @@ const userController = {
                     );
                   }
 
+                  return responseHelper(
+                    res,
+                    200,
+                    { balance: balance },
+                    "Top-up balance berhasil"
+                  );
+                }
+              );
+            }
+          );
+        }
+      );
+    } catch (err) {
+      return responseHelper(res, 500, err, "Terjadi kesalahan pada server");
+    }
+  },
+
+  transaction: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const decode = jwt.verify(token, process.env.secretLogin);
+      const email = decode.email;
+
+      const service_code = req.body.service_code;
+
+      conn.query(
+        "SELECT * FROM user WHERE email = ?",
+        [email],
+        (error, userResults) => {
+          if (error) {
+            return responseHelper(
+              res,
+              500,
+              null,
+              "Terjadi kesalahan pada server"
+            );
+          }
+
+          const user_id = userResults[0].user_id;
+
+          conn.query(
+            "SELECT * FROM service WHERE service_code = ?",
+            [service_code],
+            (error, serviceResults) => {
+              if (error) {
+                return responseHelper(
+                  res,
+                  500,
+                  null,
+                  "Terjadi kesalahan pada server"
+                );
+              }
+              const service_code = serviceResults[0].service_code;
+              const service_id = serviceResults[0].service_id;
+              const service_name = serviceResults[0].service_name;
+              const total_amount = serviceResults[0].service_tarif;
+
+              // Subquery untuk mendapatkan saldo terbaru pengguna
+              conn.query(
+                "SELECT balance FROM transaction WHERE user_id = ? ORDER BY created_on DESC LIMIT 1",
+                [user_id],
+                (error, balanceResults) => {
+                  if (error) {
+                    return responseHelper(
+                      res,
+                      500,
+                      null,
+                      "Terjadi kesalahan pada server"
+                    );
+                  }
+
+                  const balance = balanceResults[0].balance;
+                  const newBalance = balance - total_amount;
+
+                  const invoice_number = generateInvoiceNumber();
+                  const created_on = new Date();
+
                   conn.query(
-                    "UPDATE transaction SET balance = ? WHERE user_id = ?",
-                    [balance, user_id],
-                    (error, updateResults) => {
+                    "INSERT INTO transaction (user_id, service_id, invoice_number, transaction_type, total_amount, created_on, description, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    [
+                      user_id,
+                      service_id,
+                      invoice_number,
+                      "payment",
+                      total_amount,
+                      created_on,
+                      "Payment berhasil",
+                      newBalance,
+                    ],
+                    (error, transactionResults) => {
                       if (error) {
                         return responseHelper(
                           res,
                           500,
                           null,
-                          "Gagal melakukan top-up"
+                          "Gagal melakukan transaksi"
                         );
                       }
 
-                      return responseHelper(
-                        res,
-                        200,
-                        { balance: balance },
-                        "Top-up balance berhasil"
+                      conn.query(
+                        "SELECT transaction_type FROM transaction WHERE service_id = ?",
+                        [service_id],
+                        (error, transactionType) => {
+                          if (error) {
+                            return responseHelper(
+                              res,
+                              400,
+                              null,
+                              "Gagal mendapatkan data"
+                            );
+                          }
+                          const transaction_type =
+                            transactionType[0].transaction_type;
+
+                          return responseHelper(
+                            res,
+                            200,
+                            {
+                              invoice_number: invoice_number,
+                              service_code: service_code,
+                              service_name: service_name,
+                              transaction_type: transaction_type,
+                              total_amount: total_amount,
+                              created_on: created_on,
+                            },
+                            "Payment berhasil"
+                          );
+                        }
                       );
                     }
                   );
