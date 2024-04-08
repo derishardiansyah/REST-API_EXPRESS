@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-createTable();
+// createTable();
 app.use("/", docRouter);
 app.use("/api", userRouter);
 
