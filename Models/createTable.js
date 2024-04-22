@@ -1,6 +1,12 @@
 import conn from "../Config/config.js";
 
+let tableCreated = false;
+
 const createTable = () => {
+  if (tableCreated) {
+    console.log("Tabel sudah dibuat sebelumnya.");
+    return;
+  }
   conn.query(
     `CREATE TABLE IF NOT EXISTS user (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -73,9 +79,9 @@ const createTable = () => {
         return;
       }
       console.log("Tabel transaksi berhasil dibuat");
-      // conn.end();
     }
   );
+  tableCreated = true;
 };
 
 export default createTable;
