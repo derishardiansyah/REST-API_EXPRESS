@@ -601,6 +601,7 @@ const userController = {
           "LEFT JOIN service ON transaction.service_id = service.service_id " +
           "WHERE user.email = ? " +
           "ORDER BY transaction.created_on DESC",
+        [email],
         (error, results) => {
           if (error) {
             return responseHelper(
