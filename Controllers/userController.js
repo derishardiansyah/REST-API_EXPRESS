@@ -599,6 +599,7 @@ const userController = {
           "FROM transaction " +
           "LEFT JOIN user ON transaction.user_id = user.user_id " +
           "LEFT JOIN service ON transaction.service_id = service.service_id " +
+          "WHERE user.email = ? " +
           "ORDER BY transaction.created_on DESC",
         (error, results) => {
           if (error) {
