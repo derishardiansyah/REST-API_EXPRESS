@@ -58,6 +58,7 @@ const userController = {
             [email, first_name, last_name, password],
             (error, result) => {
               if (error) {
+                console.log(error);
                 return responseHelper(
                   res,
                   500,
@@ -77,6 +78,7 @@ const userController = {
         }
       );
     } catch (err) {
+      console.log(err);
       responseHelper(res, 500, err, "Terjadi kesalahan pada server");
     }
   },

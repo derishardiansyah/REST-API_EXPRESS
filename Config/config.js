@@ -16,10 +16,10 @@ const conn = mysql.createConnection({
 
 export default conn;
 
-// conn.connect((err) => {
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     console.log("Database Connected");
-//   }
-// });
+conn.connect((err) => {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log("Database Connected");
+  }
+});
